@@ -87,7 +87,7 @@ function(req, res) {
   Users.reset().fetch()
   .then(function(users) {
     res.status(200).send(users.models);
-  })
+  });
 });
 
 app.get('/signup',
@@ -126,7 +126,7 @@ function(req, res) {
   })
   .catch(function(){
 
-  })
+  });
 });
 
 

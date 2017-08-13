@@ -19,8 +19,6 @@ var User = db.Model.extend({
       console.log('Password in user.js: ', model.get('password'));
       console.log('Username in user.js: ', model.get('username'));
 
-      // this.set('error', 'ERRRROOR!!!');
-
       model.save({
         username: model.get('username'),
         password: bcrypt.hashSync(model.get('password'))
