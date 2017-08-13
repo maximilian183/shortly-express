@@ -23,24 +23,25 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/', 
+app.get('/',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 function(req, res) {
-  Links.reset().fetch().then(function(links) {
+  Links.reset().fetch()
+  .then(function(links) {
     res.status(200).send(links.models);
   });
 });
 
-app.post('/links', 
+app.post('/links',
 function(req, res) {
   var uri = req.body.url;
 
@@ -76,6 +77,57 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.get('/login',
+function(req, res) {
+  res.render('login');
+});
+
+app.post('/login',
+function(req, res) {
+  Users.reset().fetch()
+  .then(function(users) {
+    res.status(200).send(users.models);
+  })
+});
+
+app.get('/signup',
+function(req, res) {
+  res.render('signup');
+});
+
+app.post('/signup',
+function(req, res) {
+/*
+  [x] Post will have req => ?xxx=xxx&xxx=xxx
+  [x] username and password from url params
+  [ ] pass username and password in db insert method
+  [ ] salt and hash password
+  [ ] callback will return success (then promise) or error (catch promise)
+*/
+
+  console.log('Request in Signup Post:', req.body);
+
+  var username = req.body.username;
+  var password = req.body.password;
+
+  new User({username: username}).fetch()
+  .then(function(found){
+    if (found) {
+      res.redirect('/signup');
+      console.log('User already in database: ', found);
+    } else {
+      console.log('In then stmt: ', this);
+      console.log(this.get('username'));
+      this.set({'password':password});
+      console.log('outside the trigger', this.model);
+      this.trigger('pwchange', this);
+      console.log('Password is set: ', this);
+    }
+  })
+  .catch(function(){
+
+  })
+});
 
 
 /************************************************************/
