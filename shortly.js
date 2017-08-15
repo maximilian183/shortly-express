@@ -41,22 +41,22 @@ function(req, res) {
   currentSession = req.session;
   var cookie = req.cookies;
 
-  console.log('shortly_user cookie: ', req.cookies);
-  console.log('shortly_user session: ', req.session);
+  if (currentSession.username === undefined) {  //When server restarts or loadbalancer forwards to new server
 
-  if (currentSession.username === undefined || currentSession.sid === undefined) {
-    new User({username: cookie.shortly_uid, password: cookie.shortly_sid}).fetch()
-    .then(function(found){
-      this.trigger('verifysession', this, (results)=>{
-        if (currentSession.username === results.username && currentSession.password === results.password) {
-          console.log(`IT'S A MATCH!!!!!!  CONTINUE ON WITH YOUR SESSION`)
-          res.render('index');
-        } else {
-          res.redirect('/signup');
-        }
-      });
+    new User({username: cookie.shortly_uid}).fetch()   //SELECT * from users where username ===......
+    .then(function(found) {         //TRUE - return results 0 or 1
+      if (found.get('current_sid') === cookie['connect.sid']) {
+        console.log(`IT'S A MATCH!!!!!!  CONTINUE ON WITH YOUR SESSION`);
+        res.render('index');
+      } else {
+        res.redirect('/signup');
+      }
+
+    })
+    .catch(function(err){
+      console.log('Error!!: ', err);
     });
-  } else {
+  } else {  //when you immediately
     res.render('index');
   }
 });
@@ -117,10 +117,12 @@ function(req, res) {
 
 app.post('/login',
 function(req, res) {
+  // this.trigger('verifysession', this, (results)=>{
+  // });
   Users.reset().fetch()
   .then(function(users) {
     res.status(200).send(users.models);
-  })
+  });
 });
 
 
@@ -139,6 +141,8 @@ app.post('/signup',
 function(req, res) {
 
   currentSession = req.session;
+
+  console.log('Cookie SID in signup: ', req.cookies['connect.sid']);
 /*
   [x] Post will have req => ?xxx=xxx&xxx=xxx
   [x] username and password from url params
@@ -163,43 +167,26 @@ function(req, res) {
   var password = req.body.password;
 
   new User({username: username}).fetch()
-  .then(function(found){
+  .then(function(found) {
     if (found) {
       res.redirect('/signup');
       //console.log('User already in database: ', found);
     } else {
-      this.set({'password':password});
+      this.set({'password': password});
+      this.set({'current_sid': req.cookies['connect.sid']});
       var that = this;
 
-      this.trigger('pwchange', this, (results)=>{
+      this.trigger('new_user', this, (results)=>{
         // console.log(results);
-
-        if (req.cookies.shortly_uid === undefined || req.cookies.shortly_sid) {
-          currentSession.username = that.get('username');
-          currentSession.sid = that.get('password');
-          res.cookie('shortly_uid',that.get('username'), { maxAge: 900000, httpOnly: true });
-          res.cookie('shortly_sid',that.get('password'), { maxAge: 900000, httpOnly: true });
-          console.log('cookie created successfully');
-          res.redirect('/');
-        } else {
-          res.redirect('/signup');
-        }
-          // res.status(200).send(users.models);
-          // console.log('===>', req.session);
-          // console.log(req.session.user);
-          // req.session.regenerate(function(){
-          //   if (req.session.user === undefined) {
-          //     req.session.user = that.get('username');
-          //   }
-          //   console.log(req.session.user);
-          //   // res.redirect('/index');
-          // });
+        currentSession.username = that.get('username');
+        res.cookie('shortly_uid', that.get('username'), { maxAge: 900000, httpOnly: true });
+        res.redirect('/');
       });
     }
   })
-  .catch(function(){
+  .catch(function() {
 
-  })
+  });
 });
 
 
