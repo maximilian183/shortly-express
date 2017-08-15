@@ -2,33 +2,26 @@ var db = require('../config');
 var bcrypt = require('bcrypt-nodejs');
 var Promise = require('bluebird');
 
-/*
-  [x] Post will have req => ?xxx=xxx&xxx=xxx
-  [x] username and password from url params
-  [ ] pass username and password in db insert method
-  [ ] salt and hash password
-  [ ] callback will return success (then promise) or error (catch promise)
-*/
-
 var User = db.Model.extend({
   tableName: 'users',
   hasTimestamps: true,
   initialize: function() {
 
-    this.on('pwchange', function(model) {
-      console.log('Password in user.js: ', model.get('password'));
-      console.log('Username in user.js: ', model.get('username'));
+    this.on('pwchange', function(model, callback) {
 
       model.save({
         username: model.get('username'),
         password: bcrypt.hashSync(model.get('password'))
+      })
+      .then(function(results){
+        callback(results);
       });
-      console.log(model);
-      console.log('initialize again...');
     });
-  },
-  getTableName: function() {
-    console.log('tableName: ', tableName);
+
+    this.on('verifysession', function(model, callback) {
+      console.log('VerifySession: ', model);
+      callback(model);
+    })
   }
 
 });
