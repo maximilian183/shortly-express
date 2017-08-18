@@ -22,17 +22,24 @@ var User = db.Model.extend({
       });
     });
 
-    this.on('verifysession', function(model, callback) {
+    this.on('login', function(model, callback) {
       console.log('VerifySession: ', model);
-      var cookie_uid = model.get('username');
-      var cookie_sid = model.get('comparePassword');
-      var db_pass = model.get('password');
+      var loginUser = model.get('username');
+      var loginPass = model.get('comparePassword');
+      var dbPass = model.get('password');
+      var PASS_MATCH = bcrypt.compareSync(loginPass, dbPass);
 
-      console.log('VerifySession model: ', model);
+      if (PASS_MATCH) {
+        model.unset('comparePassword');
+        model.save({
+          current_sid: model.get('current_sid')
+        })
+        .then(function(){
+          callback(PASS_MATCH);
+        });
+      }
 
-      // console.log('bcrypt compareSync: ', bcrypt.compareSync(cookie_sid, db_pass) );
 
-      callback(model);
     });
   }
 
