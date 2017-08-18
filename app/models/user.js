@@ -12,7 +12,7 @@ var User = db.Model.extend({
       model.save({
         username: model.get('username'),
         password: bcrypt.hashSync(model.get('password')),
-        current_sid: model.get('current_sid')
+        currentsid: model.get('currentsid')
       })
       .then(function(results) {
         callback(results);
@@ -32,7 +32,7 @@ var User = db.Model.extend({
       if (PASS_MATCH) {
         model.unset('comparePassword');
         model.save({
-          current_sid: model.get('current_sid')
+          currentsid: model.get('currentsid')
         })
         .then(function(){
           callback(PASS_MATCH);

@@ -45,7 +45,7 @@ db.knex.schema.hasTable('users').then(function(exists) {
       users.increments('id').primary();
       users.string('username', 50).unique();
       users.string('password', 100);
-      users.string('current_sid', 255).unique();
+      users.string('currentsid', 255).unique();
       users.timestamps();
     }).then(function (table) {
       console.log('Created Table', table);
@@ -53,13 +53,13 @@ db.knex.schema.hasTable('users').then(function(exists) {
   }
 });
 
-db.knex.schema.hasTable('user_links').then(function(exists) {
+db.knex.schema.hasTable('userlinks').then(function(exists) {
   if (!exists) {
-    db.knex.schema.createTable('user_links', function (user_links) {
-      user_links.increments('id').primary();
-      user_links.string('username', 50).references('users.username');
-      user_links.integer('user_link').references('urls.id');
-      user_links.timestamps();
+    db.knex.schema.createTable('userlinks', function (userlinks) {
+      userlinks.increments('id').primary();
+      userlinks.string('username', 50).references('users.username');
+      userlinks.integer('userlink').references('urls.id');
+      userlinks.timestamps();
     }).then(function (table) {
       console.log('Created Table', table);
     });

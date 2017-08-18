@@ -3,7 +3,7 @@ var Click = require('./click');
 var crypto = require('crypto');
 
 var userLink = db.Model.extend({
-  tableName: 'user_links',
+  tableName: 'userlinks',
   hasTimestamps: true,
   clicks: function() {
     return this.hasMany(Click);

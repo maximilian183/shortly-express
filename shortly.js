@@ -36,7 +36,7 @@ var insertLinktoDB = function(uri, req, res, callback) {
       callback(newLink);
     });
   });
-}
+};
 
 
 app.set('views', __dirname + '/views');
@@ -110,7 +110,7 @@ function(req, res) {
 
     var results = links.models.map(function(model){
       if (model.get('username') === username) {
-        return model.get('user_link');
+        return model.get('userlink');
       }
     });
 
@@ -139,13 +139,13 @@ function(req, res) {
 
   new Link({ url: uri }).fetch().then(function(foundLink) {
     if (foundLink) { // in the link is in the Links table
-      new userLink({username: username, user_link: foundLink.get('id')}).fetch().then(function(foundUserLink) {
+      new userLink({username: username, userlink: foundLink.get('id')}).fetch().then(function(foundUserLink) {
         if (foundUserLink){ // if the link is also in the urer_urls table
           res.status(200).send(foundLink.attributes); // send back the link fron the Links table
-        } else { // if the link is in the Links table but NOT in the user_links table
+        } else { // if the link is in the Links table but NOT in the userlinks table
           insertLinktoDB(uri, req, res, (newLink) => {
             userLinks.create({
-              user_link: newLink.get('id'),
+              userlink: newLink.get('id'),
               username: username
             })
             .then(function(success) {
@@ -293,7 +293,7 @@ app.get('/*', function(req, res) {
       res.redirect('/');
     } else {
 
-      // new userLink({username: req.cookies.shortly_uid, user_link: link.get('id')}).fetch().then(function(found){
+      // new userLink({username: req.cookies.shortly_uid, userlink: link.get('id')}).fetch().then(function(found){
 
       //   if (found) {
       //     var click = new Click({
